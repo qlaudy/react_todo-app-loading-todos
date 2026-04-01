@@ -19,15 +19,17 @@ export const Footer: React.FC<Props> = ({
   <footer className="todoapp__footer">
     <span>{count} items left</span>
 
-    {Object.values(Status).map(status => (
-      <button
-        key={status}
-        className={filter === status ? 'selected' : ''}
-        onClick={() => setFilter(status)}
-      >
-        {status}
-      </button>
-    ))}
+    <nav className="filter" data-cy="Filter">
+      {Object.values(Status).map(status => (
+        <a
+          key={status}
+          className={filter === status ? 'selected' : ''}
+          onClick={() => setFilter(status)}
+        >
+          {status}
+        </a>
+      ))}
+    </nav>
 
     <button disabled={!hasCompleted} onClick={clearCompleted}>
       Clear completed
