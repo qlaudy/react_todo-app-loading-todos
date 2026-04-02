@@ -26,29 +26,31 @@ export const TodoItem: React.FC<Props> = ({
   updateTitle,
   handleKeyUp,
   handleEditClick,
-}) => (
-  <div data-cy="Todo" className={`todo ${todo.completed ? 'completed' : ''}`}>
-    <label className="todo__status-label">
-      <input
-        data-cy="TodoStatus"
-        type="checkbox"
-        className="todo__status"
-        checked={todo.completed}
-        onChange={() => toggleTodo(todo)}
-      />
-    </label>
+}) => {
+  const isEditing = editingTodo?.id === todo.id;
 
-    <span
-      data-cy="TodoTitle"
-      className="todo__title"
-      onDoubleClick={() => handleEditClick(todo)}
+  return (
+    <div
+      data-cy="Todo"
+      className={`todo ${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`}
     >
-      {editingTodo?.id === todo.id ? (
+      <label className="todo__status-label">
+        <input
+          data-cy="TodoStatus"
+          type="checkbox"
+          className="todo__status"
+          checked={todo.completed}
+          onChange={() => toggleTodo(todo)}
+        />
+      </label>
+
+      {isEditing ? (
         <form onSubmit={updateTitle}>
           <input
             data-cy="TodoTitleField"
             type="text"
             className="todo__title-field"
+            placeholder="Empty todo will be deleted"
             autoFocus
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
@@ -57,25 +59,33 @@ export const TodoItem: React.FC<Props> = ({
           />
         </form>
       ) : (
-        todo.title
+        <>
+          <span
+            data-cy="TodoTitle"
+            className="todo__title"
+            onDoubleClick={() => handleEditClick(todo)}
+          >
+            {todo.title}
+          </span>
+
+          <button
+            type="button"
+            className="todo__remove"
+            data-cy="TodoDelete"
+            onClick={() => deleteTodo(todo.id)}
+          >
+            ×
+          </button>
+        </>
       )}
-    </span>
 
-    <button
-      type="button"
-      className="todo__remove"
-      data-cy="TodoDelete"
-      onClick={() => deleteTodo(todo.id)}
-    >
-      ×
-    </button>
-
-    <div
-      data-cy="TodoLoader"
-      className={`modal overlay ${deletingIds.includes(todo.id) ? 'is-active' : ''}`}
-    >
-      <div className="modal-background has-background-white-ter" />
-      <div className="loader" />
+      <div
+        data-cy="TodoLoader"
+        className={`modal overlay ${deletingIds.includes(todo.id) ? 'is-active' : ''}`}
+      >
+        <div className="modal-background has-background-white-ter" />
+        <div className="loader" />
+      </div>
     </div>
-  </div>
-);
+  );
+};

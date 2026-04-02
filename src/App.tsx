@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import {
   createTodo,
@@ -19,7 +19,6 @@ import { ErrorNotification } from './Components/ErrorNotification';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | null>(null);
   const [filter, setFilter] = useState<Status>(Status.All);
   const [query, setQuery] = useState('');
@@ -28,9 +27,19 @@ export const App: React.FC = () => {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [newTitle, setNewTitle] = useState('');
 
-  useEffect(() => {
-    setIsLoading(true);
+  const todoFieldRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    todoFieldRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!tempTodo) {
+      todoFieldRef.current?.focus();
+    }
+  }, [tempTodo]);
+
+  useEffect(() => {
     getTodos()
       .then(setTodos)
       .catch(() => {
@@ -39,9 +48,7 @@ export const App: React.FC = () => {
           setErrorMessage(null);
         }, 3000);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => {});
   }, []);
 
   if (!USER_ID) {
@@ -83,7 +90,6 @@ export const App: React.FC = () => {
       userId: USER_ID,
     });
 
-    setIsLoading(true);
 
     createTodo({ title: trimmedQuery, userId: USER_ID, completed: false })
       .then(todoFromServer => {
@@ -98,7 +104,6 @@ export const App: React.FC = () => {
         }, 3000);
       })
       .finally(() => {
-        setIsLoading(false);
         setTempTodo(null);
       });
   };
@@ -120,6 +125,10 @@ export const App: React.FC = () => {
       })
       .finally(() => {
         setDeletingIds(prev => prev.filter(id => id !== todoId));
+
+        setTimeout(() => {
+          todoFieldRef.current?.focus();
+        }, 0);
       });
   };
 
@@ -227,8 +236,8 @@ export const App: React.FC = () => {
           setQuery={setQuery}
           handleSubmit={handleSubmit}
           toggleAll={toggleAll}
-          isLoading={isLoading}
           tempTodo={tempTodo}
+          todoFieldRef={todoFieldRef}
         />
 
         {(todos.length > 0 || tempTodo) && (
