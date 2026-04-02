@@ -32,7 +32,7 @@ export const Footer: React.FC<Props> = ({
             data-cy={`FilterLink${statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}`}
             onClick={() => setFilter(statusValue)}
           >
-            {statusValue}
+            {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
           </a>
         ))}
       </nav>
