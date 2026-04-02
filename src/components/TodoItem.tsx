@@ -1,51 +1,54 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
+import React from 'react';
 import { Todo } from '../types/Todo';
 
+/* eslint-disable jsx-a11y/label-has-associated-control */
 type Props = {
   todo: Todo;
-  isDeleting: boolean;
-  onDelete: (id: number) => void;
-  onToggle: (todo: Todo) => void;
+  deletingIds: number[];
+  toggleTodo: (todo: Todo) => void;
+  deleteTodo: (id: number) => void;
   editingTodo: Todo | null;
-  setEditingTodo: (todo: Todo | null) => void;
   newTitle: string;
-  setNewTitle: (value: string) => void;
+  setNewTitle: (v: string) => void;
   updateTitle: (e: React.FormEvent) => void;
   handleKeyUp: (e: React.KeyboardEvent) => void;
+  handleEditClick: (todo: Todo) => void;
 };
 
 export const TodoItem: React.FC<Props> = ({
   todo,
-  isDeleting,
-  onDelete,
-  onToggle,
+  deletingIds,
+  toggleTodo,
+  deleteTodo,
   editingTodo,
-  setEditingTodo,
   newTitle,
   setNewTitle,
   updateTitle,
   handleKeyUp,
+  handleEditClick,
 }) => (
-  <div className={`todo ${todo.completed ? 'completed' : ''}`}>
-    <label className="todo__status-label" htmlFor={`todo-${todo.id}`}>
+  <div data-cy="Todo" className={`todo ${todo.completed ? 'completed' : ''}`}>
+    <label className="todo__status-label">
       <input
-        id={`todo-${todo.id}`}
+        data-cy="TodoStatus"
         type="checkbox"
+        className="todo__status"
         checked={todo.completed}
-        onChange={() => onToggle(todo)}
+        onChange={() => toggleTodo(todo)}
       />
     </label>
 
     <span
+      data-cy="TodoTitle"
       className="todo__title"
-      onDoubleClick={() => {
-        setEditingTodo(todo);
-        setNewTitle(todo.title);
-      }}
+      onDoubleClick={() => handleEditClick(todo)}
     >
       {editingTodo?.id === todo.id ? (
         <form onSubmit={updateTitle}>
           <input
+            data-cy="TodoTitleField"
+            type="text"
+            className="todo__title-field"
             autoFocus
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
@@ -58,10 +61,20 @@ export const TodoItem: React.FC<Props> = ({
       )}
     </span>
 
-    <button onClick={() => onDelete(todo.id)}>×</button>
+    <button
+      type="button"
+      className="todo__remove"
+      data-cy="TodoDelete"
+      onClick={() => deleteTodo(todo.id)}
+    >
+      ×
+    </button>
 
-    <div className={`modal overlay ${isDeleting ? 'is-active' : ''}`}>
-      <div className="modal-background" />
+    <div
+      data-cy="TodoLoader"
+      className={`modal overlay ${deletingIds.includes(todo.id) ? 'is-active' : ''}`}
+    >
+      <div className="modal-background has-background-white-ter" />
       <div className="loader" />
     </div>
   </div>

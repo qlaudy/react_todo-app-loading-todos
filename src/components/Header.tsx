@@ -1,45 +1,44 @@
 import React from 'react';
+import { Todo } from '../types/Todo';
 
-interface Props {
+type Props = {
+  todos: Todo[];
   query: string;
   setQuery: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  handleSubmit: (e: React.FormEvent) => void;
   toggleAll: () => void;
-  allCompleted: boolean;
-  disabled: boolean;
-}
+  isLoading: boolean;
+  tempTodo: Todo | null;
+};
 
 export const Header: React.FC<Props> = ({
+  todos,
   query,
   setQuery,
-  onSubmit,
+  handleSubmit,
   toggleAll,
-  allCompleted,
-  disabled,
-}) => {
-  return (
-    <header className="todoapp__header">
-      {/* this button should have `active` class only if all todos are completed */}
-      <button
-        type="button"
-        className={`todoapp__toggle-all ${allCompleted ? 'active' : ''}`}
-        data-cy="ToggleAllButton"
-        onClick={toggleAll}
-      />
+  isLoading,
+  tempTodo,
+}) => (
+  <header className="todoapp__header">
+    <button
+      type="button"
+      className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
+      data-cy="ToggleAllButton"
+      onClick={toggleAll}
+    />
 
-      {/* Add a todo on form submit */}
-      <form onSubmit={onSubmit}>
-        <input
-          data-cy="NewTodoField"
-          type="text"
-          className="todoapp__new-todo"
-          placeholder="What needs to be done?"
-          autoFocus
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-          disabled={disabled}
-        />
-      </form>
-    </header>
-  );
-};
+    <form onSubmit={handleSubmit}>
+      <input
+        data-cy="NewTodoField"
+        type="text"
+        className="todoapp__new-todo"
+        placeholder="What needs to be done?"
+        autoFocus
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        disabled={isLoading || !!tempTodo}
+      />
+    </form>
+  </header>
+);

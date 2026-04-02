@@ -12,11 +12,10 @@ import {
 import { Todo } from './types/Todo';
 import { ErrorMessage } from './types/ErrorMessage';
 import { Status } from './types/Status';
-import { Header } from './components/Header';
-import { ErrorNotification } from './components/ErrorNotification';
-import { Footer } from './components/Footer';
-import { TodoList } from './components/TodoList';
-import { TempTodo } from './components/tempTodo';
+import { Header } from './Components/Header';
+import { TodoList } from './Components/TodoList';
+import { Footer } from './Components/Footer';
+import { ErrorNotification } from './Components/ErrorNotification';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -50,18 +49,16 @@ export const App: React.FC = () => {
   }
 
   const visibleTodos = todos.filter(todo => {
-    if (filter === Status.Active) {
+    if (filter === 'active') {
       return !todo.completed;
     }
 
-    if (filter === Status.Completed) {
+    if (filter === 'completed') {
       return todo.completed;
     }
 
     return true;
   });
-
-  const activeTodosCount = todos.filter(todo => todo.completed === false);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -71,6 +68,10 @@ export const App: React.FC = () => {
 
     if (!trimmedQuery) {
       setErrorMessage(ErrorMessage.Title);
+
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
 
       return;
     }
@@ -84,7 +85,7 @@ export const App: React.FC = () => {
 
     setIsLoading(true);
 
-    createTodo({ title: query, userId: USER_ID, completed: false })
+    createTodo({ title: trimmedQuery, userId: USER_ID, completed: false })
       .then(todoFromServer => {
         setTodos(prev => [...prev, todoFromServer]);
         setQuery('');
@@ -210,44 +211,47 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleEditClick = (todo: Todo) => {
+    setEditingTodo(todo);
+    setNewTitle(todo.title);
+  };
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
         <Header
+          todos={todos}
           query={query}
           setQuery={setQuery}
-          onSubmit={handleSubmit}
+          handleSubmit={handleSubmit}
           toggleAll={toggleAll}
-          allCompleted={todos.every(t => t.completed)}
-          disabled={isLoading}
+          isLoading={isLoading}
+          tempTodo={tempTodo}
         />
 
         {(todos.length > 0 || tempTodo) && (
-          <>
-            <TodoList
-              todos={visibleTodos}
-              deletingIds={deletingIds}
-              onDelete={deleteTodo}
-              onToggle={toggleTodo}
-              editingTodo={editingTodo}
-              setEditingTodo={setEditingTodo}
-              newTitle={newTitle}
-              setNewTitle={setNewTitle}
-              updateTitle={updateTitle}
-              handleKeyUp={handleKeyUp}
-            />
-
-            {tempTodo && <TempTodo todo={tempTodo} />}
-          </>
+          <TodoList
+            visibleTodos={visibleTodos}
+            tempTodo={tempTodo}
+            deletingIds={deletingIds}
+            toggleTodo={toggleTodo}
+            deleteTodo={deleteTodo}
+            editingTodo={editingTodo}
+            newTitle={newTitle}
+            setNewTitle={setNewTitle}
+            updateTitle={updateTitle}
+            handleKeyUp={handleKeyUp}
+            handleEditClick={handleEditClick}
+          />
         )}
+
         {/* Hide the footer if there are no todos */}
 
         {todos.length > 0 && (
           <Footer
-            count={activeTodosCount.length}
-            hasCompleted={todos.some(t => t.completed)}
+            todos={todos}
             filter={filter}
             setFilter={setFilter}
             clearCompleted={clearCompleted}
@@ -258,8 +262,8 @@ export const App: React.FC = () => {
       {/* DON'T use conditional rendering to hide the notification */}
       {/* Add the 'hidden' class to hide the message smoothly */}
       <ErrorNotification
-        message={errorMessage}
-        onClose={() => setErrorMessage(null)}
+        errorMessage={errorMessage}
+        setErrorMessage={setErrorMessage}
       />
     </div>
   );
