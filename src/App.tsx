@@ -49,11 +49,11 @@ export const App: React.FC = () => {
   }
 
   const visibleTodos = todos.filter(todo => {
-    if (filter === 'active') {
+    if (filter === Status.Active) {
       return !todo.completed;
     }
 
-    if (filter === 'completed') {
+    if (filter === Status.Completed) {
       return todo.completed;
     }
 
